@@ -19,7 +19,7 @@ public class UtilCity {
      * @param response
      * @return
      */
-    public static boolean handelProvinceResponse(@NonNull String response) {
+    public static boolean handleProvinceResponse(@NonNull String response) {
         if (!TextUtils.isEmpty(response)) {
             try {
                 JSONArray allProvince = new JSONArray(response);
