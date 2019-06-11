@@ -2,6 +2,9 @@ package com.hyweather.android.db;
 
 import org.litepal.crud.LitePalSupport;
 
+/**
+ * 省下面的市
+ */
 public class City extends LitePalSupport {
     private int id;
 

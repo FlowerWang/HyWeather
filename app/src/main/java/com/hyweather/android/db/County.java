@@ -2,7 +2,10 @@ package com.hyweather.android.db;
 
 import org.litepal.crud.LitePalSupport;
 
-public class county extends LitePalSupport {
+/**
+ * 市下面的区县
+ */
+public class County extends LitePalSupport {
     private int id;
 
     private String countyName;

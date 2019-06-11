@@ -2,6 +2,9 @@ package com.hyweather.android.db;
 
 import org.litepal.crud.LitePalSupport;
 
+/**
+ * 全国省
+ */
 public class Province extends LitePalSupport {
 
     private int id;

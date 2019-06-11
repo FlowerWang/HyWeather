@@ -10,7 +10,7 @@
     <list>
         <mapping class="com.hyweather.android.db.Province"/>
         <mapping class="com.hyweather.android.db.City"/>
-        <mapping class="com.hyweather.android.db.county"/>
+        <mapping class="com.hyweather.android.db.County"/>
     </list>
 
 </litepal>
