@@ -2,6 +2,7 @@ package com.hyweather.android.util;
 
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
+import android.util.Log;
 
 
 import com.hyweather.android.db.City;
@@ -13,7 +14,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class UtilCity {
-
     /**
      * 解析处理全国省返回数据
      * @param response
@@ -26,8 +26,8 @@ public class UtilCity {
                 for (int i = 0; i < allProvince.length(); i++) {
                     JSONObject provinceObject = allProvince.getJSONObject(i);
                     Province province = new Province();
-                    province.setId(provinceObject.getInt("id"));
                     province.setProvinceName(provinceObject.getString("name"));
+                    province.setProvinceCode(provinceObject.getInt("id"));
                     province.save();
                 }
                 return true;

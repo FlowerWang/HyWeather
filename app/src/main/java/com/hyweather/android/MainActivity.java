@@ -13,5 +13,6 @@ public class MainActivity extends AppCompatActivity {
         //初始化LitePal
         LitePal.initialize(this);
         setContentView(R.layout.activity_main);
+
     }
 }
