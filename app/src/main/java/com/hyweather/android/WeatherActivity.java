@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.preference.PreferenceManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -47,16 +48,17 @@ public class WeatherActivity extends AppCompatActivity {
 
     private TextView pm25Text;
 
+    private TextView pqltyText;
+
     private TextView comfortText;
 
     private TextView carWashText;
 
     private TextView sportText;
 
-    public static final String SHARED_ID_NOW = "weather_now";
-    public static final String SHARED_ID_FORECAST = "weather_forecast";
-    public static final String SHARED_ID_LIFESTYLE = "weather_lifestyle";
-    public static final String SHARED_ID_AIR = "weather_air";
+    private SwipeRefreshLayout swipeRefreshLayout;
+
+    public static final String SHARED_ID = "weather_cache";
 
     private String mWeatherId;
 
@@ -79,31 +81,31 @@ public class WeatherActivity extends AppCompatActivity {
         forecastLayout = findViewById(R.id.forecast_layout);
         aqiText = findViewById(R.id.aqi_text);
         pm25Text = findViewById(R.id.pm25_text);
+        pqltyText = findViewById(R.id.pqlty_text);
         comfortText = findViewById(R.id.comfort_text);
         carWashText = findViewById(R.id.car_wash_text);
         sportText = findViewById(R.id.sport_text);
+        swipeRefreshLayout = findViewById(R.id.refresh_weather);
+        swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
 
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String now = preferences.getString(SHARED_ID_NOW, null);
-        String forecast = preferences.getString(SHARED_ID_FORECAST, null);
-        String lifestyle = preferences.getString(SHARED_ID_LIFESTYLE, null);
-        String air = preferences.getString(SHARED_ID_AIR, null);
+        final String id;
 
-        if (!TextUtils.isEmpty(now) && !TextUtils.isEmpty(forecast) && !TextUtils.isEmpty(lifestyle)
-            && !TextUtils.isEmpty(air)) {
+        final String preferencesString = preferences.getString(SHARED_ID, null);
+        if (!TextUtils.isEmpty(preferencesString)) {
             //有缓存数据
-            Weather n = UtilCity.handleWeatherResponse(now);
-            Weather f = UtilCity.handleWeatherResponse(forecast);
-            Weather l = UtilCity.handleWeatherResponse(lifestyle);
-            Weather a = UtilCity.handleWeatherResponse(air);
-            Weather weather = new Weather(n.status, n.basic, n.now, n.update, f.forecastList, l.lifestyleList, a.air);
+            final Weather weather = UtilCity.handleWeatherResponse(preferencesString);
+            id = weather.basic.cid;
             showWeatherInfo(weather);
         } else {
             //无缓存
             final String weatherId = getIntent().getStringExtra("weather_id");
+            id = weatherId;
             weatherLayout.setVisibility(View.INVISIBLE);
             requestWeather(weatherId);
         }
+
+        swipeRefreshLayout.setOnRefreshListener(() -> requestWeather(id) );
 
     }
 
@@ -112,15 +114,9 @@ public class WeatherActivity extends AppCompatActivity {
      * 根据天气id请求城市天气信息。
      */
     public void requestWeather(final String weatherId) {
-        //实况天气
-        String nowUrl = "https://free-api.heweather.net/s6/weather/now?location=" + weatherId + "&key=c165187a82f9444da8f9631d0cb80a6d";
-        //3-10天预报
-        String forecastUrl = "https://free-api.heweather.net/s6/weather/forecast?location="+ weatherId +"&key=c165187a82f9444da8f9631d0cb80a6d";
-        //生活指数
-        String lifestyleUrl = "https://free-api.heweather.net/s6/weather/lifestyle?location=" + weatherId +"&key=c165187a82f9444da8f9631d0cb80a6d";
-        //空气质量实况
-        String airUrl = "https://free-api.heweather.net/s6/air/now?location="+ weatherId +"&key=c165187a82f9444da8f9631d0cb80a6d";
-        HttpUtil.sendOkHttpRequest(nowUrl, new Callback() {
+        String weatherUrl = "http://guolin.tech/api/weather?cityid=" + weatherId + "&key=c165187a82f9444da8f9631d0cb80a6d";
+
+        HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 final String responseText = response.body().string();
@@ -128,94 +124,22 @@ public class WeatherActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     if (weather != null && "ok".equals(weather.status)) {
                         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
-                        editor.putString(SHARED_ID_NOW, responseText);
+                        editor.putString(SHARED_ID, responseText);
                         editor.apply();
-                        mWeatherId = weather.basic.getCid();
                         showWeatherInfo(weather);
                     } else {
                         Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
                     }
+                    swipeRefreshLayout.setRefreshing(false);
                 });
             }
 
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
-                runOnUiThread(() -> Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show() );
-            }
-        });
-
-        HttpUtil.sendOkHttpRequest(forecastUrl, new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
-                runOnUiThread(() -> Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show() );
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                final String responseText = response.body().string();
-                final Weather weather = UtilCity.handleWeatherResponse(responseText);
                 runOnUiThread(() -> {
-                    if (weather != null && "ok".equals(weather.status)) {
-                        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
-                        editor.putString(SHARED_ID_FORECAST, responseText);
-                        editor.apply();
-                        mWeatherId = weather.basic.getCid();
-                        showWeatherInfo(weather);
-                    } else {
-                        Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-        });
-
-        HttpUtil.sendOkHttpRequest(lifestyleUrl, new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
-                runOnUiThread(() -> Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show() );
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                final String responseText = response.body().string();
-                final Weather weather = UtilCity.handleWeatherResponse(responseText);
-                runOnUiThread(() -> {
-                    if (weather != null && "ok".equals(weather.status)) {
-                        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
-                        editor.putString(SHARED_ID_LIFESTYLE, responseText);
-                        editor.apply();
-                        mWeatherId = weather.basic.getCid();
-                        showWeatherInfo(weather);
-                    } else {
-                        Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-        });
-
-        HttpUtil.sendOkHttpRequest(airUrl, new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
-                runOnUiThread(() -> Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show() );
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                final String responseText = response.body().string();
-                final Weather weather = UtilCity.handleWeatherResponse(responseText);
-                runOnUiThread(() -> {
-                    if (weather != null && "ok".equals(weather.status)) {
-                        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
-                        editor.putString(SHARED_ID_AIR, responseText);
-                        editor.apply();
-                        mWeatherId = weather.basic.getCid();
-                        showWeatherInfo(weather);
-                    } else {
-                        Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
-                    }
+                    Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
+                    swipeRefreshLayout.setRefreshing(false);
                 });
             }
         });
@@ -226,14 +150,14 @@ public class WeatherActivity extends AppCompatActivity {
      * 处理并展示Weather实体类中的数据。
      */
     private void showWeatherInfo(Weather weather) {
-        String cityName = weather.basic.getLocation();
-        String updateTime = weather.update.getLoc().split(" ")[1];
+        String cityName = weather.basic.location;
+        String updateTime = weather.update.loc.split(" ")[1];
         titleCity.setText(cityName);
         titleUpdateTime.setText(updateTime);
 
         if (weather.now != null) {
-            String tmp = weather.now.getTmp() + "℃";
-            String weatherInfo = weather.now.getCondTxt();
+            String tmp = weather.now.tmp + "℃";
+            String weatherInfo = weather.now.condTxt;
             tmpText.setText(tmp);
             weatherInfoText.setText(weatherInfo);
         }
@@ -246,35 +170,24 @@ public class WeatherActivity extends AppCompatActivity {
                 TextView infoText = view.findViewById(R.id.info_text);
                 TextView maxText = view.findViewById(R.id.max_text);
                 TextView minText = view.findViewById(R.id.min_text);
-                dateText.setText(forecast.getDate());
-                infoText.setText(forecast.getCondTxtd());
-                maxText.setText(forecast.getTmpMax());
-                minText.setText(forecast.getTmpMin());
+                dateText.setText(forecast.date);
+                infoText.setText(forecast.cond.txtd);
+                maxText.setText(forecast.tmp.max);
+                minText.setText(forecast.tmp.min);
                 forecastLayout.addView(view);
             }
         }
 
-        if (weather.air != null) {
-            aqiText.setText(weather.air.getAqi());
-            pm25Text.setText(weather.air.getPm25());
+        if (weather.air.city != null) {
+            aqiText.setText(weather.air.city.aqi);
+            pm25Text.setText(weather.air.city.pm25);
+            pqltyText.setText(weather.air.city.qlty);
         }
 
-        if (weather.lifestyleList != null && weather.lifestyleList.size() > 0) {
-            for (LifeStyle lifeStyle : weather.lifestyleList) {
-                switch (lifeStyle.getType()) {
-                    case "comf":
-                        comfortText.setText(("舒适度：" + lifeStyle.getTxt()));
-                        break;
-                    case "cw":
-                        carWashText.setText(("洗车指数：" + lifeStyle.getTxt()));
-                        break;
-                    case "sport":
-                        sportText.setText(("运行建议：" + lifeStyle.getTxt()));
-                        break;
-                    default:
-                        break;
-                }
-            }
+        if (weather.suggestion != null) {
+            comfortText.setText(("舒适度：" + weather.suggestion.comf.txt));
+            carWashText.setText(("洗车指数：" + weather.suggestion.cw.txt));
+            sportText.setText(("运行建议：" + weather.suggestion.sport.txt));
         }
 
         weatherLayout.setVisibility(View.VISIBLE);

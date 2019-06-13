@@ -20,12 +20,12 @@ public class Basic {
      * tz : +8.00
      */
 
-    private String cid;
-    private String location;
+    public String cid;
+    public String location;
     @SerializedName("parent_city")
-    private String parentCity;
+    public String parentCity;
     @SerializedName("admin_area")
-    private String adminArea;
+    public String adminArea;
 
     public Update update;
 
@@ -36,55 +36,8 @@ public class Basic {
          * utc : 2019-06-12 07:24
          */
 
-        private String loc;
-        private String utc;
-
-        public String getLoc() {
-            return loc;
-        }
-
-        public void setLoc(String loc) {
-            this.loc = loc;
-        }
-
-        public String getUtc() {
-            return utc;
-        }
-
-        public void setUtc(String utc) {
-            this.utc = utc;
-        }
+        public String loc;
+        public String utc;
     }
 
-    public String getCid() {
-        return cid;
-    }
-
-    public void setCid(String cid) {
-        this.cid = cid;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
-    public String getParentCity() {
-        return parentCity;
-    }
-
-    public void setParentCity(String parentCity) {
-        this.parentCity = parentCity;
-    }
-
-    public String getAdminArea() {
-        return adminArea;
-    }
-
-    public void setAdminArea(String adminArea) {
-        this.adminArea = adminArea;
-    }
 }

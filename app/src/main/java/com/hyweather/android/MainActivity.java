@@ -18,11 +18,8 @@ public class MainActivity extends AppCompatActivity {
         LitePal.initialize(this);
         setContentView(R.layout.activity_main);
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String now = preferences.getString(WeatherActivity.SHARED_ID_NOW, null);
-        String forecast = preferences.getString(WeatherActivity.SHARED_ID_FORECAST, null);
-        String lifestyle = preferences.getString(WeatherActivity.SHARED_ID_LIFESTYLE, null);
-        String air = preferences.getString(WeatherActivity.SHARED_ID_AIR, null);
-        if (!TextUtils.isEmpty(now) && !TextUtils.isEmpty(forecast) && !TextUtils.isEmpty(lifestyle) && !TextUtils.isEmpty(air)) {
+
+        if (!TextUtils.isEmpty(preferences.getString(WeatherActivity.SHARED_ID, null)) ) {
             Intent intent = new Intent(this, WeatherActivity.class);
             startActivity(intent);
             finish();

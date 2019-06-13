@@ -16,7 +16,7 @@ import org.json.JSONObject;
 
 public class UtilCity {
 
-    private static final String HEWEATHER = "HeWeather6";
+    private static final String HEWEATHER = "HeWeather";
     /**
      * 解析处理全国省返回数据
      * @param response
