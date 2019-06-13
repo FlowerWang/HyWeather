@@ -5,12 +5,15 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.preference.PreferenceManager;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -58,7 +61,11 @@ public class WeatherActivity extends AppCompatActivity {
 
     private ImageView bingPic;
 
-    private SwipeRefreshLayout swipeRefreshLayout;
+    public DrawerLayout drawerLayout;
+
+    private Button titleBtn;
+
+    public SwipeRefreshLayout swipeRefreshLayout;
 
     public static final String SHARED_ID = "weather_cache";
     public static final String BING_ID = "bing_pic";
@@ -89,6 +96,8 @@ public class WeatherActivity extends AppCompatActivity {
         carWashText = findViewById(R.id.car_wash_text);
         sportText = findViewById(R.id.sport_text);
         bingPic = findViewById(R.id.bing_pic);
+        drawerLayout = findViewById(R.id.weather_drawer);
+        titleBtn = findViewById(R.id.title_btn);
         swipeRefreshLayout = findViewById(R.id.refresh_weather);
         swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
 
@@ -116,6 +125,13 @@ public class WeatherActivity extends AppCompatActivity {
         } else {
             loadBingPic();
         }
+
+        titleBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
     }
 
 
