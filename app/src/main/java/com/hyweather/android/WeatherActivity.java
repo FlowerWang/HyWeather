@@ -11,18 +11,18 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.hyweather.android.gson.Forecast;
-import com.hyweather.android.gson.LifeStyle;
 import com.hyweather.android.gson.Weather;
 import com.hyweather.android.util.HttpUtil;
 import com.hyweather.android.util.UtilCity;
 
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 
@@ -56,9 +56,12 @@ public class WeatherActivity extends AppCompatActivity {
 
     private TextView sportText;
 
+    private ImageView bingPic;
+
     private SwipeRefreshLayout swipeRefreshLayout;
 
     public static final String SHARED_ID = "weather_cache";
+    public static final String BING_ID = "bing_pic";
 
     private String mWeatherId;
 
@@ -85,6 +88,7 @@ public class WeatherActivity extends AppCompatActivity {
         comfortText = findViewById(R.id.comfort_text);
         carWashText = findViewById(R.id.car_wash_text);
         sportText = findViewById(R.id.sport_text);
+        bingPic = findViewById(R.id.bing_pic);
         swipeRefreshLayout = findViewById(R.id.refresh_weather);
         swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
 
@@ -106,7 +110,12 @@ public class WeatherActivity extends AppCompatActivity {
         }
 
         swipeRefreshLayout.setOnRefreshListener(() -> requestWeather(id) );
-
+        final String bing = preferences.getString(BING_ID, null);
+        if (!TextUtils.isEmpty(bing)) {
+            Glide.with(this).load(bing).into(bingPic);
+        } else {
+            loadBingPic();
+        }
     }
 
 
@@ -191,5 +200,33 @@ public class WeatherActivity extends AppCompatActivity {
         }
 
         weatherLayout.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * 加载必应每日一图
+     */
+    private void loadBingPic() {
+        String requestBingPic = "http://guolin.tech/api/bing_pic";
+        HttpUtil.sendOkHttpRequest(requestBingPic, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                final String bing = response.body().string();
+                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
+                editor.putString(BING_ID, bing);
+                editor.apply();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Glide.with(WeatherActivity.this).load(bing).into(bingPic);
+                    }
+                });
+            }
+        });
+
     }
 }
