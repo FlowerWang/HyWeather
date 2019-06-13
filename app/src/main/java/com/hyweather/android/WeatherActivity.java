@@ -102,23 +102,22 @@ public class WeatherActivity extends AppCompatActivity {
         swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
 
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        final String id;
 
         final String preferencesString = preferences.getString(SHARED_ID, null);
         if (!TextUtils.isEmpty(preferencesString)) {
             //有缓存数据
             final Weather weather = UtilCity.handleWeatherResponse(preferencesString);
-            id = weather.basic.cid;
+            mWeatherId = weather.basic.cid;
             showWeatherInfo(weather);
         } else {
             //无缓存
             final String weatherId = getIntent().getStringExtra("weather_id");
-            id = weatherId;
+            mWeatherId = weatherId;
             weatherLayout.setVisibility(View.INVISIBLE);
             requestWeather(weatherId);
         }
 
-        swipeRefreshLayout.setOnRefreshListener(() -> requestWeather(id) );
+        swipeRefreshLayout.setOnRefreshListener(() -> requestWeather(mWeatherId) );
         final String bing = preferences.getString(BING_ID, null);
         if (!TextUtils.isEmpty(bing)) {
             Glide.with(this).load(bing).into(bingPic);
@@ -151,6 +150,7 @@ public class WeatherActivity extends AppCompatActivity {
                         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
                         editor.putString(SHARED_ID, responseText);
                         editor.apply();
+                        mWeatherId = weather.basic.cid;
                         showWeatherInfo(weather);
                     } else {
                         Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
