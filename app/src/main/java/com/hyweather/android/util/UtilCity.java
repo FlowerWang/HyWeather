@@ -2,18 +2,21 @@ package com.hyweather.android.util;
 
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
-import android.util.Log;
 
 
+import com.google.gson.Gson;
 import com.hyweather.android.db.City;
 import com.hyweather.android.db.County;
 import com.hyweather.android.db.Province;
+import com.hyweather.android.gson.Weather;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class UtilCity {
+
+    private static final String HEWEATHER = "HeWeather6";
     /**
      * 解析处理全国省返回数据
      * @param response
@@ -83,6 +86,20 @@ public class UtilCity {
             }
         }
         return false;
+    }
+
+    public static Weather handleWeatherResponse(@NonNull String response) {
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            final JSONArray jsonArray = jsonObject.getJSONArray(HEWEATHER);
+            final String content = jsonArray.get(0).toString();
+            final Weather weather = new Gson().fromJson(content, Weather.class);
+            return weather;
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
 }

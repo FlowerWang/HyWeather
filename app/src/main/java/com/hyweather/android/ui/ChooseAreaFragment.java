@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hyweather.android.R;
+import com.hyweather.android.WeatherActivity;
 import com.hyweather.android.db.City;
 import com.hyweather.android.db.County;
 import com.hyweather.android.db.Province;
@@ -34,8 +35,6 @@ import okhttp3.Callback;
 import okhttp3.Response;
 
 public class ChooseAreaFragment extends Fragment {
-
-    private static final String TAG = "ChooseAreaFragment";
 
     public static final int LEVEL_PROVINCE = 0;
 
@@ -107,6 +106,12 @@ public class ChooseAreaFragment extends Fragment {
             } else if (currentLevel == LEVEL_CITY) {
                 selectedCity = cityList.get(position);
                 queryCounties();
+            } else if (currentLevel == LEVEL_COUNTY) {
+                final String weatherId = countyList.get(position).getWeatherId();
+                Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                intent.putExtra("weather_id", weatherId);
+                startActivity(intent);
+                getActivity().finish();
             }
         });
 
@@ -196,6 +201,7 @@ public class ChooseAreaFragment extends Fragment {
             public void onFailure(Call call, IOException e) {
                 getActivity().runOnUiThread(() -> {
                     closeProgressDialog();
+                    e.printStackTrace();
                     Toast.makeText(getContext(), "加载失败啦QAQ", Toast.LENGTH_SHORT).show();
                 });
             }

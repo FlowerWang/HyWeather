@@ -2,9 +2,16 @@
   <dictionary name="Rebot">
     <words>
       <w>cityid</w>
+      <w>coden</w>
+      <w>comf</w>
+      <w>heweather</w>
       <w>hyweather</w>
       <w>litepal</w>
+      <w>pcpn</w>
       <w>provinceid</w>
+      <w>qlty</w>
+      <w>txtd</w>
+      <w>txtn</w>
     </words>
   </dictionary>
 </component>
