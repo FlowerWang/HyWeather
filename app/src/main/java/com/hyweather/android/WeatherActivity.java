@@ -23,6 +23,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.hyweather.android.gson.Forecast;
 import com.hyweather.android.gson.Weather;
+import com.hyweather.android.service.AutoUpdateService;
 import com.hyweather.android.util.HttpUtil;
 import com.hyweather.android.util.UtilCity;
 
@@ -216,6 +217,9 @@ public class WeatherActivity extends AppCompatActivity {
         }
 
         weatherLayout.setVisibility(View.VISIBLE);
+
+        Intent intent = new Intent(this, AutoUpdateService.class);
+        startService(intent);
     }
 
     /**
